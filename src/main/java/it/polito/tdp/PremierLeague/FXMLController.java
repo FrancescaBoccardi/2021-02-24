@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
 
 import it.polito.tdp.PremierLeague.model.Match;
 import it.polito.tdp.PremierLeague.model.Model;
+import it.polito.tdp.PremierLeague.model.Simulatore;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -48,16 +49,58 @@ public class FXMLController {
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	
+    	txtResult.clear();
+    	
+    	Match m = cmbMatch.getValue();
+    	
+    	if(m==null) {
+    		txtResult.appendText("Seleziona un match");
+    		return;
+    	}
+    	
+    	this.model.creaGrafo(m);
+    	txtResult.appendText("GRAFO CREATO\n");
+    	txtResult.appendText("#VERTICI: "+this.model.nVertici()+"\n");
+    	txtResult.appendText("#ARCHI: "+this.model.nArchi()+"\n");
     }
 
     @FXML
     void doGiocatoreMigliore(ActionEvent event) {    	
+    	txtResult.clear();
     	
+    	 if(this.model.getGrafo()==null) {
+    		 txtResult.appendText("Crea prima il grafo");
+    		 return;
+    	 }
+    	 
+    	 txtResult.appendText("GIOCATORE MIGLIORE:\n"+this.model.getMigliore());
     }
     
     @FXML
     void doSimula(ActionEvent event) {
-
+    	
+    	int N;
+    	Match m = cmbMatch.getValue();
+    	
+    	 if(this.model.getGrafo()==null) {
+    		 txtResult.appendText("Crea prima il grafo");
+    		 return;
+    	 }
+    	 
+    	
+    	try {
+    		N = Integer.parseInt(txtN.getText());
+    	} catch(NumberFormatException nfe) {
+    		txtResult.appendText("Formato numero azioni salienti errato");
+    		return;
+    	}
+    	
+    	this.model.simula(N, m);
+    	
+    	this.txtResult.appendText("\nRisultato della partita: "+this.model.getSimulatore().getGoalSq1()+" - "+this.model.getSimulatore().getGoalSq2());
+    	this.txtResult.appendText("\nGiocatori espulsi "+m.getTeamHomeNAME()+": "+this.model.getSimulatore().getEspulsiSq1());
+    	this.txtResult.appendText("\nGiocatori espulsi "+m.getTeamAwayNAME()+": "+this.model.getSimulatore().getEspulsiSq2());
+    	this.txtResult.appendText("\nInfortuni: "+this.model.getSimulatore().getInfortuni());
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -73,5 +116,6 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	this.cmbMatch.getItems().addAll(model.getMatches());
     }
 }
